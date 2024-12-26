@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="./cos-js-sdk-v5.min.js"></script>
+  <script src="./cos.js"></script>
+  <style>
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th, .table td {
+      border: 1px solid #000;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <input type="file" id="file" accept="image/*">
+    <button id="upload">识别</button>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>时间</th>
+        <th>金额</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+    </tbody>
+  </table>
+  <script>
+    const file = document.getElementById('file')
+    const uploadBtn = document.getElementById('upload')
+    uploadBtn.addEventListener('click', () => {
+      upload(file.files[0], (progressData) => {
+        console.log('上传进度：', progressData)
+      }, async (data) => {
+        console.log('上传成功：', data)
+        const result = await fetch('/api/ocr', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            image: 'https://' + data.Location
+          })
+        }).then(res => res.json())
+        const extractedData = result.data.StructuralList.flatMap(group => 
+          group.Groups.flatMap(groupItem => 
+            groupItem.Lines.map(line => ({
+              AutoName: line.Key.AutoName,
+              AutoContent: line.Value.AutoContent
+            }))
+          )
+        )
+        const tbody = document.getElementById('tbody')
+        // 需要两个autoceontent在一行
+        const rows = extractedData.map(item => `<td>${item.AutoContent}</td>`)
+        tbody.innerHTML = tbody.innerHTML + `<tr>${rows.join('')}</tr>`
+        console.log('识别结果：', extractedData)
+      }, (e) => {
+        console.log('上传失败：', e)
+      })
+    })
+  </script>
+</body>
+</html>

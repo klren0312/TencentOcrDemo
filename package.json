@@ -1,0 +1,20 @@
+{
+  "name": "tencent_ocr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env index.js",
+    "dev": "nodemon --env-file=.env index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2",
+    "qcloud-cos-sts": "^3.1.1",
+    "tencentcloud-sdk-nodejs": "^4.0.1000"
+  }
+}
